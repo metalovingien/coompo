@@ -1,0 +1,53 @@
+body {
+	background-color: #ddd;
+	font-family: sans-serif;
+	padding: 2em;
+}
+
+#app {
+	background-color: #fff;
+	box-shadow: .2em .2em #bbb;
+	display: inline-block;
+	padding: 2em;
+}
+
+#winner {
+	font-size: 1.5em;
+	margin-bottom: 1em;
+}
+
+#history {
+	margin-bottom: 2em;
+}
+
+.cell {
+	display: inline-block;
+	height: 4em;
+	line-height: 4em;
+	margin: .1em;
+	text-align: center;
+	vertical-align: middle;
+	width: 4em;
+}
+
+.no-player {
+	background-color: #ddd;
+}
+.no-player:hover {
+	outline: .2em solid #aaa;
+}
+.player-x {
+	background-color: #bbf;
+}
+.player-o {
+	background-color: #fbb;
+}
+
+#restart {
+	border: 0;
+	box-shadow: .15em .15em #bbb;
+	display: inline-block;
+	font-size: 1.2em;
+	margin-top: 2em;
+	padding: .5em 1em;
+}

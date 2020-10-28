@@ -1,0 +1,59 @@
+body {
+	background-color: #ddd;
+	font-family: sans-serif;
+	padding: 2em;
+}
+
+#app {
+	background-color: #eee;
+	box-shadow: .2em .2em #bbb;
+	display: inline-block;
+	padding: 2em;
+}
+
+.cell {
+	display: inline-block;
+	height: 1em;
+	margin: 1px;
+	vertical-align: top;
+	width: 1em;
+}
+.dead {
+	background-color: #fff;
+}
+.alive, .born, .dying {
+	border-radius: .25em;
+}
+.alive {
+	background-color: #0a0;
+}
+.born {
+	background-color: #4e4;
+}
+.dying {
+	background-color: #ddd;
+}
+
+#play, #clear, #ticks {
+	border: 0;
+	box-shadow: .15em .15em #bbb;
+	color: #fff;
+	display: inline-block;
+	font-size: 1.2em;
+	margin-right: 1em;
+	margin-top: 2em;
+	padding: .5em 1em;
+}
+#play.play {
+	background-color: #4e4;
+}
+#play.pause {
+	background-color: #55f;
+}
+#ticks {
+	color: #000;
+}
+#clear {
+	background-color: #f55;
+	color: #fff;
+}

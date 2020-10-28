@@ -1,0 +1,33 @@
+{
+  "name": "coompo",
+  "version": "1.0.0",
+  "description": "Compy.js v1.0.0-SNAPSHOT",
+  "author": "metalovingien",
+  "license": "GPL-3.0-or-later",
+  "main": "coompo.js",
+  "scripts": {
+    "build": "babel coompo.js -d dist; minify dist/coompo.js > dist/coompo.min.js",
+    "test": "jasmine"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/metalovingien/coompo.git"
+  },
+  "bugs": {
+    "url": "https://github.com/metalovingien/coompo/issues"
+  },
+  "homepage": "https://github.com/metalovingien/coompo#readme",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.3",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "fs": "0.0.1-security",
+    "jasmine": "^3.6.2",
+    "minify": "^6.0.0",
+    "path": "^0.12.7"
+  }
+}
