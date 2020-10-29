@@ -142,3 +142,27 @@ on: {
     '@my-event': (props, data) => props.dummy = data.dummy
 }
 ```
+
+### Memoization with `memoKey`
+Memoization allow faster re-rendering of components that are often rendered with the same props' values.
+
+It is useful with complex components, when computing a key is faster than re-computing the rendering.
+
+An in-memory map stores for each props configuration met the rendering expected.
+
+The optional `memoKey` field of a component is a function used to compute the keys of such a map.
+
+It has one argument : the components's props.
+
+And it should return a simple value (`undefined` or `null` or a boolean or a number or a string).
+
+```javascript
+const cell = Coompo.Component({
+    name: 'cell',
+    props: {
+        active: { required: true }
+    },
+    render: (props) => `<div class="cell ${ props.active ? 'active' : '' }"></div>`,
+    memoKey: (props) => props.active
+})
+```

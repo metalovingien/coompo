@@ -89,7 +89,8 @@ const cell = Coompo.Component({
             state.world[props.index] = props.value
         },
         '@update': (props) => props.value = state.world[props.index]
-    }
+    },
+    memoKey: (props) => props.value
 })
 
 

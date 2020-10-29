@@ -68,7 +68,7 @@ const detachEventHandlers = (instance) =>
 }
 
 
-const render = (instance) =>
+const callRender = (instance) =>
 {
 	const html = String(instance.component.render(instance.props))
 	const el = document.createElement('div')
@@ -79,6 +79,30 @@ const render = (instance) =>
 			'render_not_one_root',
 			`The component '${instance.component.name}' must have one root element.`
 		)
+	}
+	return html;
+}
+
+
+const render = (instance) =>
+{
+	let html;
+	if (instance.component.memo)
+	{
+		const memoKey = instance.component.memoKey(instance.props)
+		if (instance.component.memo.hasOwnProperty(memoKey))
+		{
+			html = instance.component.memo[memoKey]
+		}
+		else
+		{
+			html = callRender(instance)
+			instance.component.memo[memoKey] = html
+		}
+	}
+	else
+	{
+		html = callRender(instance)
 	}
 	return html.replace(/^([^<]*<\w+)(\W.*)$/m, (_match, p1, p2) =>
 		p1 + ` coompo-id="${instance.id}"` + p2
@@ -98,6 +122,11 @@ const rerender = (instance) =>
 Coompo.Component = (component) =>
 {
 	Coompo.components[component.name] = component
+	
+	if (component.hasOwnProperty('memoKey'))
+	{
+		component.memo = {}
+	}
 
 	component.of = (props = {}) =>
 	{
