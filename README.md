@@ -1,5 +1,5 @@
 # Coompo
-v1.0.1
+v1.0.2
 
 `npm install`: Install required packages
 
@@ -82,9 +82,36 @@ const title = Coompo.Component({
 })
 ```
 
+## The `propChange` event
+The `propChange` event is triggered when a prop's value has changed. Its arguments are :
+
+1. the prop's name
+2. the new value of the prop
+3. the old value of the prop
+
+
+```javascript
+const game = Coompo.Component({
+    /* ... */
+    props: {
+        winner: { default: null }
+    }
+    on: {
+        propChange: (prop, newValue, oldValue) =>
+        {
+            if (prop = 'winner')
+            {
+                console.log(`Now the winner is ${newValue} !`)
+            }
+        }
+    }
+})
+
+```
+
 ## Custom events
 
-### Emit a custom event...
+### Emit a custom event with `Coompo.emit()`...
 ```javascript
 const startButton = Coompo.Component({
     /* ... */
@@ -94,7 +121,7 @@ const startButton = Coompo.Component({
 })
 ```
 
-### ... then react to the event
+### ... then react to the event with `on[@event]` 
 ```javascript
 const app = Coompo.Component({
     /* ... */
