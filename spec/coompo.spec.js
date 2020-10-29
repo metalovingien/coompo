@@ -2,7 +2,15 @@
 
 const fs = require('fs')
 const path = require('path')
-const coompo = fs.readFileSync(path.resolve(__dirname, '../coompo.js'), 'utf-8').replace(/const Coompo/m, 'global.Coompo')
+const jsdom = require('jsdom')
+
+// emulate browser for Coompo
+global.window = new jsdom.JSDOM('<html><body></body></html>').window
+global.document = window.document
+global.Node = window.Node
+
+const coompo = fs.readFileSync(path.resolve(__dirname, '../coompo.js'), 'utf-8')
+    .replace(/const Coompo/m, 'global.Coompo')
 global.eval(coompo)
 
 describe("[Coompo.js]", () =>

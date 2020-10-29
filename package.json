@@ -5,6 +5,10 @@
   "author": "metalovingien",
   "license": "GPL-3.0-or-later",
   "main": "coompo.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/metalovingien/coompo.git"
+  },
   "scripts": {
     "build": "babel coompo.js -d dist; minify dist/coompo.js > dist/coompo.min.js",
     "test": "jasmine"
@@ -16,6 +20,7 @@
     "babel-preset-env": "^1.7.0",
     "fs": "0.0.1-security",
     "jasmine": "^3.6.2",
+    "jsdom": "^16.4.0",
     "minify": "^6.0.0",
     "path": "^0.12.7"
   }
