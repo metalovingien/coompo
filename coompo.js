@@ -69,10 +69,21 @@ const detachEventHandlers = (instance) =>
 
 
 const render = (instance) =>
-	String(instance.component.render(instance.props))
-		.replace(/^([^<]*<\w+)(\W.*)$/m, (_match, p1, p2) =>
-			p1 + ` coompo-id="${instance.id}"` + p2
-		);
+{
+	const html = String(instance.component.render(instance.props))
+	const el = document.createElement('div')
+	el.innerHTML = html
+	if (el.childNodes.length !== 1 || el.childNodes[0].nodeType !== Node.ELEMENT_NODE)
+	{
+		throw Coompo.Exception(
+			'render_not_one_root',
+			`The component '${instance.component.name}' must have one root element.`
+		)
+	}
+	return html.replace(/^([^<]*<\w+)(\W.*)$/m, (_match, p1, p2) =>
+		p1 + ` coompo-id="${instance.id}"` + p2
+	)
+}
 
 
 const rerender = (instance) =>
@@ -81,7 +92,7 @@ const rerender = (instance) =>
 	forSelfAndChildren(instance, detachEventHandlers)
 	getElement(instance).outerHTML = render(instance)
 	forSelfAndChildren(instance, attachEventHandlers)
-};
+}
 
 
 Coompo.Component = (component) =>
@@ -97,20 +108,26 @@ Coompo.Component = (component) =>
 			{
 				if (!component.props[p].hasOwnProperty('default') && !component.props[p].hasOwnProperty('required'))
 				{
-					throw Coompo.Exception('prop_misdefined',
-						`The prop '${p}' of the component '${component.name}' must be either '{ required: true }' or '{ default: ... }'.`)
+					throw Coompo.Exception(
+						'prop_misdefined',
+						`The prop '${p}' of the component '${component.name}' must be either '{ required: true }' or '{ default: ... }'.`
+					)
 				}
 				if (component.props[p].hasOwnProperty('default') && component.props[p].required)
 				{
-					throw Coompo.Exception('prop_both_default_required',
-							`The prop '${p}' of the component '${component.name}' can't be both default and required.`)
+					throw Coompo.Exception(
+						'prop_both_default_required',
+						`The prop '${p}' of the component '${component.name}' can't be both default and required.`
+					)
 				}
 				if (!props.hasOwnProperty(p))
 				{
 					if (component.props[p].required)
 					{
-						throw Coompo.Exception('prop_required',
-							`The prop '${p}' of the component '${component.name}' is required.`)
+						throw Coompo.Exception(
+							'prop_required',
+							`The prop '${p}' of the component '${component.name}' is required.`
+						)
 					}
 					else
 					{
@@ -128,10 +145,10 @@ Coompo.Component = (component) =>
 		}
 
 		return render(Coompo.instances[id])
-	};
+	}
 
 	return component
-};
+}
 
 
 Coompo.compose = (component, props = {}) =>
@@ -160,7 +177,7 @@ Coompo.compose = (component, props = {}) =>
 				}
 			}
 			instance.previousProps = {...instance.props}
-		});
+		})
 		if (changedInstances.length === 1)
 		{
 			rerender(Coompo.instances[changedInstances[0]])
