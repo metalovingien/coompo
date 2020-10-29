@@ -8,16 +8,29 @@ const Coompo = {
 }
 
 
+/**
+ * Any Coompo exception
+ * @param {string} name 
+ * @param {string} message 
+ */
 Coompo.Exception = (name, message) => ({
 	name,
 	message
 })
 
 
+/**
+ * Get the DOM element related to this component instance
+ * @param {object} instance 
+ * @returns {Element} the element
+ */
 const getElement = (instance) => document.querySelector(`[coompo-id="${instance.id}"]`)
 
 
-
+/**
+ * Do something for all component instances
+ * @param {function} action 
+ */
 const forAllInstances = (action) =>
 {
 	for (const id in Coompo.instances)
@@ -27,6 +40,11 @@ const forAllInstances = (action) =>
 }
 
 
+/**
+ * Do something for a component instance and all its children
+ * @param {object} instance 
+ * @param {function} action 
+ */
 const forSelfAndChildren = (instance, action) =>
 {
 	Array.from(getElement(instance).outerHTML.matchAll(/coompo-id="(\d+)"/gm))
@@ -34,9 +52,18 @@ const forSelfAndChildren = (instance, action) =>
 }
 
 
+/**
+ * Whether an event is a Coompo event (propChange event, custom event) - not a HTML event (onclick, onmouseenter...)
+ * @param {string} eventName 
+ * @returns {boolean} whether it is a Coompo event
+ */
 const isCoompoEvent = (eventName) => eventName === 'propChange' || eventName.startsWith('@')
 
 
+/**
+ * Attach event handlers for HTML events (onclick, onmouseenter...)
+ * @param {object} instance 
+ */
 const attachEventHandlers = (instance) =>
 {
 	if (instance.component.on)
@@ -53,6 +80,10 @@ const attachEventHandlers = (instance) =>
 }
 
 
+/**
+ * Detach event handlers for HTML events (onclick, onmouseenter...)
+ * @param {object} instance 
+ */
 const detachEventHandlers = (instance) =>
 {
 	if (instance.component.on)
@@ -68,7 +99,12 @@ const detachEventHandlers = (instance) =>
 }
 
 
-const render = (instance) =>
+/**
+ * Call the render() function of a component instance and check if it produces one root HTML element
+ * @param {object} instance 
+ * @returns {string} HTML produced
+ */
+const callRender = (instance) =>
 {
 	const html = String(instance.component.render(instance.props))
 	const el = document.createElement('div')
@@ -80,12 +116,45 @@ const render = (instance) =>
 			`The component '${instance.component.name}' must have one root element.`
 		)
 	}
+	return html;
+}
+
+
+/**
+ * Render a component instance in order to insert a new DOM element
+ * @param {object} instance 
+ * @returns {string} HTML produced
+ */
+const render = (instance) =>
+{
+	let html;
+	if (instance.component.memo)
+	{
+		const memoKey = instance.component.memoKey(instance.props)
+		if (instance.component.memo.hasOwnProperty(memoKey))
+		{
+			html = instance.component.memo[memoKey]
+		}
+		else
+		{
+			html = callRender(instance)
+			instance.component.memo[memoKey] = html
+		}
+	}
+	else
+	{
+		html = callRender(instance)
+	}
 	return html.replace(/^([^<]*<\w+)(\W.*)$/m, (_match, p1, p2) =>
 		p1 + ` coompo-id="${instance.id}"` + p2
 	)
 }
 
 
+/**
+ * Re-render an exisitng DOM element related to this component instance
+ * @param {object} instance 
+ */
 const rerender = (instance) =>
 {
 	Coompo.nextInstance = instance.id + 1
@@ -95,9 +164,19 @@ const rerender = (instance) =>
 }
 
 
+/**
+ * Register a component
+ * @param {object} component options of the comoponent
+ * @returns {object} the component
+ */
 Coompo.Component = (component) =>
 {
 	Coompo.components[component.name] = component
+	
+	if (component.hasOwnProperty('memoKey'))
+	{
+		component.memo = {}
+	}
 
 	component.of = (props = {}) =>
 	{
@@ -151,6 +230,12 @@ Coompo.Component = (component) =>
 }
 
 
+/**
+ * Render an instance of this root component with those props
+ * at the DOM placeholder element marked with the 'coompo-root' attribute
+ * @param {object} component 
+ * @param {object} props 
+ */
 Coompo.compose = (component, props = {}) =>
 {
 	document.querySelector('[coompo-root]').outerHTML = component.of(props)
@@ -191,6 +276,11 @@ Coompo.compose = (component, props = {}) =>
 }
 
 
+/**
+ * Emit a custom event with this name and passing those data
+ * @param {string} name 
+ * @param {any} data 
+ */
 Coompo.emit = (name, data) =>
 {
 	forAllInstances((instance) =>
