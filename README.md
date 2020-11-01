@@ -1,5 +1,5 @@
 # Coompo
-v1.1.1
+v1.2.0
 
 `npm install`: Install required packages
 
@@ -70,6 +70,30 @@ const section = Coompo.Component({
 ### ... then `compose()` in a script after linking `compo.js`
 ```javascript
 Coompo.compose(myRootComponent)
+```
+
+## Double-binding with `coompo-is`
+You can use double-binding between an input's value and a component's prop :
+
+1. Modifying the value will also modify the prop
+
+2. Modifying the prop will also modify the value
+
+```javascript
+const hello = Coompo.Component({
+    /* ... */
+    props: {
+        name: { default:'' }
+    },
+    render: (props) =>
+
+`<form>
+    <input coompo-is="name" />
+    <div>Hello ${ props.name } !</div>
+</form>`
+
+})
+
 ```
 
 ## React to HTML events with the `on` field of a component

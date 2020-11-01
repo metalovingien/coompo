@@ -2,6 +2,7 @@
 
 
 const Coompo = {
+	bindings: {},
 	components: {},
 	instances: {},
 	nextInstance: 0
@@ -24,7 +25,7 @@ Coompo.Exception = (name, message) => ({
  * @param {object} instance 
  * @returns {Element} the element
  */
-const getElement = (instance) => document.querySelector(`[coompo-id="${instance.id}"]`)
+const getElement = (instance) => document.querySelector(`[_coo-i="${instance.id}"]`)
 
 
 /**
@@ -47,7 +48,7 @@ const forAllInstances = (action) =>
  */
 const forSelfAndChildren = (instance, action) =>
 {
-	Array.from(getElement(instance).outerHTML.matchAll(/coompo-id="(\d+)"/gm))
+	Array.from(getElement(instance).outerHTML.matchAll(/_coo-i="(\d+)"/gm))
 		.forEach(match => action(Coompo.instances[match[1]]))
 }
 
@@ -77,6 +78,25 @@ const attachEventHandlers = (instance) =>
 			}
 		}
 	}
+
+	const elements = getElement(instance).getElementsByTagName('*')
+	let nextBinding = 0
+	for (let i = 0; i < elements.length; i++)
+	{
+		const el = elements[i]
+		if (el.getAttribute('coompo-is'))
+		{
+			const binding = `${instance.id}:${nextBinding++}`
+			const propName = el.getAttribute('coompo-is')
+			Coompo.bindings[binding] = {
+				instance,
+				propName,
+				eventListener: () => instance.props[propName] = el.value
+			}
+			el.setAttribute('_coo-b', binding)
+			el.addEventListener('input', Coompo.bindings[binding].eventListener)
+		}
+	}
 }
 
 
@@ -94,6 +114,19 @@ const detachEventHandlers = (instance) =>
 			{
 				getElement(instance)[`on${eventName}`] = null
 			}
+		}
+	}
+
+	const elements = getElement(instance).getElementsByTagName('*')
+	for (let i = 0; i < elements.length; i++)
+	{
+		const el = elements[i]
+		if (el.getAttribute('coompo-is'))
+		{
+			const binding = el.getAttribute('_coo-b')
+			el.removeAttribute('_coo-b')
+			el.removeEventListener('input', Coompo.bindings[binding].eventListener)
+			delete Coompo.bindings[binding]
 		}
 	}
 }
@@ -116,7 +149,7 @@ const callRender = (instance) =>
 			`The component '${instance.component.name}' must have one root element.`
 		)
 	}
-	return html;
+	return html
 }
 
 
@@ -127,7 +160,7 @@ const callRender = (instance) =>
  */
 const render = (instance) =>
 {
-	let html;
+	let html
 	if (instance.component.memo)
 	{
 		const memoKey = instance.component.memoKey(instance.props)
@@ -146,21 +179,57 @@ const render = (instance) =>
 		html = callRender(instance)
 	}
 	return html.replace(/^([^<]*<\w+)(\W.*)$/m, (_match, p1, p2) =>
-		p1 + ` coompo-id="${instance.id}"` + p2
+		p1 + ` _coo-i="${instance.id}"` + p2
 	)
 }
 
 
 /**
- * Re-render an exisitng DOM element related to this component instance
+ * Re-render the DOM elements related to this component instance, keeping the focused element
  * @param {object} instance 
  */
 const rerender = (instance) =>
 {
+	// Remember the focused element
+	let focused = document.activeElement
+	let focusedInstance = null
+	let focusedBinding = null
+	const elements = getElement(instance).getElementsByTagName('*')
+	for (let i = 0; i < elements.length; i++)
+	{
+		if (elements[i] === document.activeElement)
+		{
+			const focused = elements[i]
+			if (focused.getAttribute('_coo-i'))
+			{
+				focusedInstance = focused.getAttribute('_coo-i')
+			}
+			else if (focused.getAttribute('_coo-b'))
+			{
+				focusedBinding = focused.getAttribute('_coo-b')
+			}
+		}
+	}
+	
+	// Rerender and re-attach the event handlers
 	Coompo.nextInstance = instance.id + 1
 	forSelfAndChildren(instance, detachEventHandlers)
 	getElement(instance).outerHTML = render(instance)
 	forSelfAndChildren(instance, attachEventHandlers)
+
+	// Restore the focused element
+	if (focusedInstance)
+	{
+		document.querySelector(`[_coo-i="${focusedInstance}"]`).focus()
+	}
+	else if (focusedBinding)
+	{
+		document.querySelector(`[_coo-b="${focusedBinding}"]`).focus()
+	}
+	else if (focused)
+	{
+		focused.focus()
+	}
 }
 
 
@@ -270,6 +339,11 @@ Coompo.compose = (component, props = {}) =>
 		else if (changedInstances.length > 0)
 		{
 			rerender(Coompo.instances[0])
+		}
+		for (const b in Coompo.bindings)
+		{
+			const binding = Coompo.bindings[b]
+			document.querySelector(`[_coo-b="${b}"]`).value = binding.instance.props[binding.propName]
 		}
 	},
 	10)
